@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.db
+*.db-shm
+*.db-wal
+lighthouse-report*.json
+mhu-report*.json
+mhu-report*.html

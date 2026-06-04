@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - LeadFlow WA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  
+  <nav class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <span class="text-xl font-bold text-gray-900">LeadFlow<span class="text-green-600">WA</span> Admin</span>
+        </div>
+        <div class="flex items-center">
+          <button id="logoutBtn" class="text-gray-500 hover:text-gray-700 font-medium text-sm">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- TABS -->
+    <div class="border-b border-gray-200 mb-6">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <button id="tab-cs" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Manajemen CS
+        </button>
+        <button id="tab-settings" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Konfigurasi Integrasi
+        </button>
+        <button id="tab-leads" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Data Leads Terakhir
+        </button>
+      </nav>
+    </div>
+
+    <!-- TAB: MANAJEMEN CS -->
+    <div id="panel-cs" class="space-y-6">
+      <div class="bg-white shadow rounded-lg p-6 border border-gray-100">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-medium text-gray-900">Daftar Customer Service</h2>
+          <button onclick="openCsModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            + Tambah CS Baru
+          </button>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama CS</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. WhatsApp</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="csTableBody" class="bg-white divide-y divide-gray-200">
+              <!-- JS Populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: KONFIGURASI -->
+    <div id="panel-settings" class="hidden space-y-6">
+      <div class="bg-white shadow rounded-lg p-6 border border-gray-100">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Pengaturan Sistem & Integrasi</h2>
+        <form id="settingsForm" class="space-y-6">
+          <div id="settingsAlert" class="hidden p-4 rounded-md text-sm mb-4"></div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Notion Integration Token</label>
+            <input type="text" id="notion_token" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="secret_...">
+            <p class="mt-1 text-xs text-gray-500">Token dari Notion API Integration.</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Notion Database ID</label>
+            <input type="text" id="notion_database_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g. 841b...">
+            <p class="mt-1 text-xs text-gray-500">ID dari database tabel di Notion.</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Template Pesan WhatsApp</label>
+            <textarea id="wa_template" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Halo, saya tertarik..."></textarea>
+            <p class="mt-1 text-xs text-gray-500">Gunakan tag <code>{nama}</code> dan <code>{produk}</code> untuk dinamis konten.</p>
+          </div>
+
+          <div>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Simpan Pengaturan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB: LEADS -->
+    <div id="panel-leads" class="hidden space-y-6">
+      <div class="bg-white shadow rounded-lg p-6 border border-gray-100">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">100 Leads Terakhir</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telepon</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned CS</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sync</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="leadsTableBody" class="bg-white divide-y divide-gray-200">
+              <!-- JS Populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CS Modal -->
+  <div id="csModal" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeCsModal()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <form id="csForm">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-title">Tambah / Edit CS</h3>
+            
+            <input type="hidden" id="cs_id">
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Nama CS</label>
+                <input type="text" id="cs_name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Nomor WhatsApp</label>
+                <input type="text" id="cs_phone" required placeholder="Contoh: 628123456789" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <p class="mt-1 text-xs text-gray-500">Gunakan kode negara (misal 62) tanpa tanda + atau 0.</p>
+              </div>
+
+              <div class="flex items-center">
+                <input id="cs_active" type="checkbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <label for="cs_active" class="ml-2 block text-sm text-gray-900">Aktif (Terima Leads)</label>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+              Simpan
+            </button>
+            <button type="button" onclick="closeCsModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              Batal
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lead Modal -->
+  <div id="leadModal" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="lead-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeLeadModal()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <form id="leadForm">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="lead-modal-title">Edit Lead</h3>
+            
+            <input type="hidden" id="lead_id">
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Nama Customer</label>
+                <input type="text" id="lead_name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+                <input type="text" id="lead_phone" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Produk</label>
+                <input type="text" id="lead_product" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Assigned CS</label>
+                <select id="lead_cs" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                  <!-- JS Populated -->
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Status Sync Notion</label>
+                <select id="lead_sync_status" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                  <option value="PENDING">PENDING</option>
+                  <option value="SUCCESS">SUCCESS</option>
+                  <option value="FAILED">FAILED</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+              Simpan
+            </button>
+            <button type="button" onclick="closeLeadModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              Batal
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div id="confirmModal" class="hidden fixed z-50 inset-0 overflow-y-auto" aria-labelledby="confirm-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeConfirmModal()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+              <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+              <h3 class="text-lg leading-6 font-medium text-gray-900" id="confirm-modal-title">Konfirmasi Hapus</h3>
+              <div class="mt-2">
+                <p class="text-sm text-gray-500" id="confirm-modal-message">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button type="button" id="confirmBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+            Hapus
+          </button>
+          <button type="button" onclick="closeConfirmModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+            Batal
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>
