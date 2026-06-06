@@ -2,6 +2,7 @@ document.getElementById('leadForm').addEventListener('submit', async function(e)
   e.preventDefault();
   
   const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
   const phone = document.getElementById('phone').value;
   const product = document.getElementById('product').value;
   
@@ -12,7 +13,7 @@ document.getElementById('leadForm').addEventListener('submit', async function(e)
   const errorMessage = document.getElementById('errorMessage');
 
   // Basic client-side validation
-  if (!name || !phone || !product) {
+  if (!name || !email || !phone || !product) {
     showError('Silakan lengkapi semua data.');
     return;
   }
@@ -32,6 +33,7 @@ document.getElementById('leadForm').addEventListener('submit', async function(e)
       },
       body: JSON.stringify({
         customer_name: name,
+        customer_email: email,
         customer_phone: phone,
         product: product
       })

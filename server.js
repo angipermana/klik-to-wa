@@ -131,9 +131,9 @@ app.delete('/api/admin/leads/:id', requireAuth, (req, res) => {
 
 // --- PUBLIC API ---
 app.post('/api/leads', (req, res) => {
-  const { customer_name, customer_phone, product } = req.body;
+  const { customer_name, customer_email, customer_phone, product } = req.body;
   
-  if (!customer_name || !customer_phone || !product) {
+  if (!customer_name || !customer_email || !customer_phone || !product) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
@@ -167,12 +167,12 @@ app.post('/api/leads', (req, res) => {
   db.prepare('UPDATE settings SET current_index = ?').run(currentIndex + 1);
   
   // Save Lead to DB
-  const insertLeadStmt = db.prepare('INSERT INTO leads (customer_name, customer_phone, product, assigned_cs) VALUES (?, ?, ?, ?)');
-  const info = insertLeadStmt.run(customer_name, formattedPhone, product, selectedCs.phone_number);
+  const insertLeadStmt = db.prepare('INSERT INTO leads (customer_name, customer_email, customer_phone, product, assigned_cs) VALUES (?, ?, ?, ?, ?)');
+  const info = insertLeadStmt.run(customer_name, customer_email, formattedPhone, product, selectedCs.phone_number);
   const leadId = info.lastInsertRowid;
   
   // Async send to notion
-  sendToNotion(leadId, customer_name, formattedPhone, product, selectedCs.name, settings);
+  sendToNotion(leadId, customer_name, customer_email, formattedPhone, product, selectedCs.name, settings);
 
   // Prepare WA Link
   let waTemplate = settings.wa_template;
@@ -183,7 +183,7 @@ app.post('/api/leads', (req, res) => {
   res.json({ success: true, redirectUrl: waUrl });
 });
 
-async function sendToNotion(leadId, name, phone, product, csName, settings) {
+async function sendToNotion(leadId, name, email, phone, product, csName, settings) {
   if (!settings.notion_token || !settings.notion_database_id) {
     console.log('Notion not configured, skipping sync.');
     return;
@@ -196,6 +196,7 @@ async function sendToNotion(leadId, name, phone, product, csName, settings) {
       properties: {
         "Tanggal Masuk": { title: [{ text: { content: new Date().toLocaleString('id-ID') } }] },
         "Nama": { rich_text: [{ text: { content: name } }] },
+        "Email": { email: email },
         "No. WhatsApp": { phone_number: phone },
         "Produk Pilihan": { rich_text: [{ text: { content: product } }] },
         "Nama CS": { select: { name: csName } }

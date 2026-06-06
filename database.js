@@ -29,6 +29,7 @@ function initDb() {
     CREATE TABLE IF NOT EXISTS leads (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       customer_name TEXT NOT NULL,
+      customer_email TEXT,
       customer_phone TEXT NOT NULL,
       product TEXT NOT NULL,
       assigned_cs TEXT NOT NULL,
